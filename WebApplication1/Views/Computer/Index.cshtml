@@ -1,0 +1,1331 @@
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>电脑信息管理系统</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <style>
+        /* 全局样式 */
+        body {
+            background-color: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        /* 容器样式 */
+        .container {
+            margin-top: 30px;
+            max-width: 1400px;
+        }
+        
+        /* 卡片样式 */
+        .card {
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        /* 卡片头部样式 */
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-bottom: none;
+        }
+        
+        /* 标题样式 */
+        .card-header h2 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        /* 工具条样式 */
+        .toolbar {
+            background-color: white;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        /* 搜索框样式 */
+        .search-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .search-input {
+            min-width: 200px;
+            max-width: 300px;
+        }
+        
+        /* 按钮样式优化 */
+        .btn {
+            border-radius: 6px;
+            font-weight: 500;
+            padding: 8px 16px;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        /* 表格样式 */
+        .table-container {
+            background-color: white;
+            padding: 20px;
+        }
+        
+        .table-responsive {
+            margin: 0;
+        }
+        
+        .table {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .table thead {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .table th, .table td {
+            text-align: center;
+            vertical-align: middle;
+            padding: 12px 8px;
+        }
+        
+        .table th {
+            font-weight: 600;
+            color: #495057;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+        
+        .table tbody tr {
+            transition: all 0.2s ease;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        /* 状态标签样式 */
+        .status-label {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-1 { 
+            background-color: #6c757d; 
+            box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);
+        } /* 待安装 */
+        
+        .status-2 { 
+            background-color: #dc3545; 
+            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+        } /* 配件异常 */
+        
+        .status-3 { 
+            background-color: #ffc107; 
+            color: #212529; 
+            box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
+        } /* 待出售 */
+        
+        .status-4 { 
+            background-color: #28a745; 
+            box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+        } /* 已售 */
+        
+        /* 操作按钮组 */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        /* 空数据样式 */
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        
+        .no-data i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        /* 加载动画 */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(102, 126, 234, 0.1);
+            border-left-color: #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        
+        @@keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 模态框样式优化 */
+        .modal-content {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px 12px 0 0;
+            padding: 20px;
+        }
+        
+        .modal-title {
+            font-weight: 600;
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .form-control {
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            padding: 10px 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        /* Toast提示样式 */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: none;
+            animation: slideInRight 0.3s ease;
+        }
+        
+        @@keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* 响应式设计 */
+        @@media (max-width: 768px) {
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-group {
+                justify-content: center;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+            }
+        }
+        
+        /* 利润颜色样式 */
+        .profit-positive {
+            color: #28a745;
+            font-weight: 600;
+        }
+        
+        .profit-negative {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        
+        /* 分页样式 */
+        .pagination {
+            margin: 0;
+        }
+        
+        .page-item {
+            margin: 0 2px;
+        }
+        
+        .page-link {
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            color: #667eea;
+            padding: 8px 14px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .page-link:hover {
+            border-color: #667eea;
+            background-color: #f8f9ff;
+            color: #667eea;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        }
+        
+        .page-item.active .page-link {
+            background-color: #667eea;
+            border-color: #667eea;
+            color: white;
+        }
+        
+        .page-item.disabled .page-link {
+            color: #6c757d;
+            background-color: #f8f9fa;
+            border-color: #e9ecef;
+        }
+        
+        /* 响应式设计 - 分页适配 */
+        @@media (max-width: 768px) {
+            .pagination {
+                flex-wrap: wrap;
+            }
+            
+            .page-item {
+                margin: 2px;
+            }
+            
+            .page-link {
+                padding: 6px 10px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 主卡片 -->
+        <div class="card">
+            <!-- 卡片头部 -->
+            <div class="card-header">
+                <h2>电脑信息管理系统</h2>
+            </div>
+            
+            <!-- 工具条 -->
+            <div class="toolbar">
+                <!-- 搜索和筛选 -->
+                <div class="search-group">
+                    <input type="text" id="searchInput" class="form-control search-input" placeholder="搜索电脑名称...">
+                    <select id="statusFilter" class="form-control">
+                        <option value="">全部状态</option>
+                        <option value="1">待安装</option>
+                        <option value="2">配件异常</option>
+                        <option value="3">待出售</option>
+                        <option value="4">已售</option>
+                    </select>
+                    <button id="searchBtn" class="btn btn-primary">搜索</button>
+                    <button id="resetBtn" class="btn btn-secondary">重置</button>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div class="action-buttons">
+                    <button id="refreshBtn" class="btn btn-primary">
+                        <i class="bi bi-arrow-clockwise"></i> 刷新列表
+                    </button>
+                    <a href="@Url.Action("Create", "Computer")" class="btn btn-success">
+                        <i class="bi bi-plus"></i> 添加电脑
+                    </a>
+                </div>
+            </div>
+            
+            <!-- 已售电脑汇总统计 -->
+            <div class="p-4 bg-light border-top border-bottom">
+                <div class="container-fluid">
+                    <h5 class="text-primary mb-3">已售电脑汇总统计</h5>
+                    <div class="row g-3" id="summaryStats">
+                        <!-- 统计数据将通过jQuery动态加载 -->
+                        <div class="col-md-2">
+                            <div class="bg-white rounded-lg p-3 shadow-sm text-center">
+                                <p class="text-muted mb-1">已售数量</p>
+                                <h4 class="mb-0" id="totalCount">--</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="bg-white rounded-lg p-3 shadow-sm text-center">
+                                <p class="text-muted mb-1">总销售额</p>
+                                <h4 class="mb-0 text-success" id="totalSaleAmount">¥--</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="bg-white rounded-lg p-3 shadow-sm text-center">
+                                <p class="text-muted mb-1">总成本</p>
+                                <h4 class="mb-0 text-secondary" id="totalCostAmount">¥--</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="bg-white rounded-lg p-3 shadow-sm text-center">
+                                <p class="text-muted mb-1">总平台提成</p>
+                                <h4 class="mb-0 text-warning" id="totalPlatformCommission">¥--</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="bg-white rounded-lg p-3 shadow-sm text-center">
+                                <p class="text-muted mb-1">总利润</p>
+                                <h4 class="mb-0 text-primary" id="totalProfitAmount">¥--</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="bg-white rounded-lg p-3 shadow-sm text-center">
+                                <p class="text-muted mb-1">利润率</p>
+                                <h4 class="mb-0 text-info" id="profitRate">--%</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 表格容器 -->
+            <div class="table-container">
+                <!-- 加载动画 -->
+                <div id="loading" class="loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>数据加载中...</p>
+                </div>
+                
+                <!-- 表格 -->
+                <div class="table-responsive">
+                    <table id="computerTable" class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>电脑名称</th>
+                                <th>录入时间</th>
+                                <th>销售状态</th>
+                                <th>状态时间</th>
+                                <th>成本金额</th>
+                                <th>售出金额</th>
+                                <th>平台提成</th>
+                                <th>最终利润</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 数据将通过jQuery动态加载 -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 空数据提示 -->
+                <div id="noData" class="no-data" style="display: none;">
+                    <i class="bi bi-database-fill-exclamation"></i>
+                    <h5>暂无电脑信息</h5>
+                    <p>点击"添加电脑"按钮开始录入数据</p>
+                </div>
+                
+                <!-- 分页控件容器 -->
+                <div id="paginationContainer" class="mt-4" style="display: none;">
+                    <!-- 分页控件将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast提示容器 -->
+    <div id="toastContainer"></div>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    
+    <!-- jQuery -->
+    <script src="@Url.Content("~/Scripts/jquery-3.7.0.js")"></script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 全局变量
+        var allComputers = [];
+        var currentPage = 1;
+        var pageSize = 20;
+        var totalPages = 1;
+        var totalCount = 0;
+        
+        $(document).ready(function () {
+            // 初始化
+            initializeApp();
+            
+            // 加载电脑列表
+            loadComputerListByPage();
+        });
+        
+        // 初始化应用
+        function initializeApp() {
+            // 绑定事件
+            bindEvents();
+        }
+        
+        // 绑定事件
+        function bindEvents() {
+            // 刷新按钮事件
+            $('#refreshBtn').click(function() {
+                currentPage = 1;
+                loadComputerListByPage();
+            });
+            
+            // 搜索按钮事件
+            $('#searchBtn').click(function() {
+                currentPage = 1;
+                loadComputerListByPage();
+            });
+            
+            // 重置按钮事件
+            $('#resetBtn').click(function() {
+                resetSearchFilter();
+                currentPage = 1;
+                loadComputerListByPage();
+            });
+            
+            // 回车键搜索
+            $('#searchInput').keypress(function(e) {
+                if (e.which === 13) {
+                    currentPage = 1;
+                    loadComputerListByPage();
+                }
+            });
+            
+            // 状态筛选变化事件
+            $('#statusFilter').change(function() {
+                currentPage = 1;
+                loadComputerListByPage();
+            });
+        }
+        
+        // 显示加载状态
+        function showLoading() {
+            $('#loading').show();
+            $('#computerTable').hide();
+            $('#noData').hide();
+        }
+        
+        // 隐藏加载状态
+        function hideLoading() {
+            $('#loading').hide();
+        }
+        
+        // 分页加载电脑列表
+        function loadComputerListByPage() {
+            showLoading();
+            
+            // 获取搜索关键词和状态筛选
+            var searchKeyword = $('#searchInput').val().trim();
+            var saleStatus = $('#statusFilter').val();
+            
+            // 将空字符串转换为null，便于服务器端处理
+            saleStatus = saleStatus === '' ? null : parseInt(saleStatus);
+            
+            $.ajax({
+                url: '@Url.Action("GetComputerListByPage", "Computer")',
+                type: 'GET',
+                data: {
+                    pageIndex: currentPage,
+                    pageSize: pageSize,
+                    searchKeyword: searchKeyword,
+                    saleStatus: saleStatus
+                },
+                dataType: 'json',
+                success: function (response) {
+                    allComputers = response.items;
+                    totalCount = response.totalCount;
+                    totalPages = response.totalPages;
+                    
+                    // 渲染电脑列表
+                    renderComputerList(allComputers);
+                    
+                    // 渲染分页控件
+                    renderPagination();
+                    
+                    hideLoading();
+                },
+                error: function () {
+                    hideLoading();
+                    showToast('获取电脑列表失败，请稍后重试', 'error');
+                }
+            });
+        }
+        
+        // 渲染电脑列表
+        function renderComputerList(computers) {
+            var tbody = $('#computerTable tbody');
+            tbody.empty();
+            
+            if (computers.length === 0) {
+                $('#noData').show();
+                $('#computerTable').hide();
+                $('#paginationContainer').hide();
+                return;
+            }
+            
+            $('#noData').hide();
+            $('#computerTable').show();
+            $('#paginationContainer').show();
+            
+            $.each(computers, function (index, computer) {
+                var statusText = getStatusText(computer.SaleStatus);
+                var statusClass = 'status-' + computer.SaleStatus;
+                
+                // 利润样式
+                var profitClass = computer.ProfitAmount >= 0 ? 'profit-positive' : 'profit-negative';
+                var profitText = '¥' + computer.ProfitAmount.toFixed(2);
+                
+                // 计算序号（考虑分页）
+                var serialNumber = (currentPage - 1) * pageSize + (index + 1);
+                
+                var row = '<tr>' +
+                    '<td>' + serialNumber + '</td>' +
+                    '<td>' + computer.ComputerName + '</td>' +
+                    '<td>' + formatDate(computer.CreateTime) + '</td>' +
+                    '<td><span class="status-label ' + statusClass + '">' + statusText + '</span></td>' +
+                    '<td>' + formatDate(computer.StatusTime) + '</td>' +
+                    '<td>¥' + computer.CostAmount.toFixed(2) + '</td>' +
+                    '<td>¥' + computer.SaleAmount.toFixed(2) + '</td>' +
+                    '<td>¥' + computer.PlatformCommission.toFixed(2) + '</td>' +
+                    '<td class="' + profitClass + '">' + profitText + '</td>' +
+                    '<td class="action-buttons">' +
+                    '<button class="btn btn-info btn-sm me-1" onclick="showParts(' + computer.Id + ', \'' + computer.ComputerName + '\')" title="查看配件详情">' +
+                    '<i class="bi bi-pc-display-horizontal"></i> 配件详情' +
+                    '</button>' +
+                    '<button class="btn btn-warning btn-sm me-1" onclick="showUpdateStatusModal(' + computer.Id + ', \'' + computer.ComputerName + '\', ' + computer.SaleStatus + ', ' + computer.SaleAmount + ', ' + computer.PlatformCommission + ')" title="修改销售状态">' +
+                    '<i class="bi bi-pencil"></i> 修改状态' +
+                    '</button>' +
+                    '<button class="btn btn-danger btn-sm" onclick="showDeleteModal(' + computer.Id + ', \'' + computer.ComputerName + '\')" title="删除电脑">' +
+                    '<i class="bi bi-trash"></i> 删除' +
+                    '</button>' +
+                    '</td>' +
+                    '</tr>';
+                
+                tbody.append(row);
+            });
+        }
+        
+        // 渲染分页控件
+        function renderPagination() {
+            var paginationHtml = '';
+            
+            // 分页统计信息
+            var start = (currentPage - 1) * pageSize + 1;
+            var end = Math.min(currentPage * pageSize, totalCount);
+            
+            paginationHtml += '<div class="d-flex justify-content-between align-items-center">';
+            paginationHtml += '<div class="text-muted">';
+            paginationHtml += '显示 ' + start + '-' + end + ' 条，共 ' + totalCount + ' 条记录';
+            paginationHtml += '</div>';
+            paginationHtml += '<nav aria-label="Page navigation">';
+            paginationHtml += '<ul class="pagination">';
+            
+            // 上一页按钮
+            paginationHtml += '<li class="page-item ' + (currentPage === 1 ? 'disabled' : '') + '">';
+            paginationHtml += '<a class="page-link" href="#" onclick="changePage(' + (currentPage - 1) + ')">';
+            paginationHtml += '<i class="bi bi-chevron-left"></i>';
+            paginationHtml += '</a>';
+            paginationHtml += '</li>';
+            
+            // 页码按钮
+            var startPage = Math.max(1, currentPage - 2);
+            var endPage = Math.min(totalPages, currentPage + 2);
+            
+            // 首页按钮
+            if (startPage > 1) {
+                paginationHtml += '<li class="page-item">';
+                paginationHtml += '<a class="page-link" href="#" onclick="changePage(1)">1</a>';
+                paginationHtml += '</li>';
+                if (startPage > 2) {
+                    paginationHtml += '<li class="page-item disabled"><a class="page-link" href="#">...</a></li>';
+                }
+            }
+            
+            // 中间页码
+            for (var i = startPage; i <= endPage; i++) {
+                paginationHtml += '<li class="page-item ' + (currentPage === i ? 'active' : '') + '">';
+                paginationHtml += '<a class="page-link" href="#" onclick="changePage(' + i + ')">' + i + '</a>';
+                paginationHtml += '</li>';
+            }
+            
+            // 末页按钮
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    paginationHtml += '<li class="page-item disabled"><a class="page-link" href="#">...</a></li>';
+                }
+                paginationHtml += '<li class="page-item">';
+                paginationHtml += '<a class="page-link" href="#" onclick="changePage(' + totalPages + ')">' + totalPages + '</a>';
+                paginationHtml += '</li>';
+            }
+            
+            // 下一页按钮
+            paginationHtml += '<li class="page-item ' + (currentPage === totalPages ? 'disabled' : '') + '">';
+            paginationHtml += '<a class="page-link" href="#" onclick="changePage(' + (currentPage + 1) + ')">';
+            paginationHtml += '<i class="bi bi-chevron-right"></i>';
+            paginationHtml += '</a>';
+            paginationHtml += '</li>';
+            
+            paginationHtml += '</ul>';
+            paginationHtml += '</nav>';
+            paginationHtml += '</div>';
+            
+            $('#paginationContainer').html(paginationHtml);
+        }
+        
+        // 切换页码
+        function changePage(pageIndex) {
+            if (pageIndex < 1 || pageIndex > totalPages || pageIndex === currentPage) {
+                return;
+            }
+            
+            currentPage = pageIndex;
+            loadComputerListByPage();
+        }
+        
+        // 重置搜索和筛选
+        function resetSearchFilter() {
+            $('#searchInput').val('');
+            $('#statusFilter').val('');
+            currentPage = 1;
+            loadComputerListByPage();
+        }
+        
+        // 获取销售状态文本
+        function getStatusText(status) {
+            switch (status) {
+                case 1: return '待安装';
+                case 2: return '配件异常';
+                case 3: return '待出售';
+                case 4: return '已售';
+                default: return '未知状态';
+            }
+        }
+        
+        // 格式化日期
+        function formatDate(dateString) {
+            // 添加错误处理，确保日期格式正确
+            if (!dateString) {
+                return '';
+            }
+            
+            // 尝试解析日期
+            var date;
+            try {
+                // 处理ASP.NET MVC默认的JSON日期格式：/Date(1766990147000)/
+                if (typeof dateString === 'string') {
+                    // 检查是否是/Date(1234567890000)/格式
+                    var dateRegex = /\/Date\((\d+)\)\//;
+                    var match = dateString.match(dateRegex);
+                    if (match && match[1]) {
+                        // 提取时间戳并创建Date对象
+                        var timestamp = parseInt(match[1]);
+                        date = new Date(timestamp);
+                    } else {
+                        // 处理其他格式
+                        dateString = dateString.replace('T', ' ').replace('Z', '');
+                        date = new Date(dateString);
+                    }
+                } else {
+                    // 如果是数字，直接创建Date对象
+                    date = new Date(dateString);
+                }
+            } catch (e) {
+                return dateString; // 解析失败时返回原始字符串
+            }
+            
+            // 检查日期是否有效
+            if (isNaN(date.getTime())) {
+                return dateString; // 无效日期返回原始字符串
+            }
+            
+            // 直接使用原生Date方法格式化，按照年-月-日 时:分:秒格式
+            var year = date.getFullYear();
+            var month = String(date.getMonth() + 1).padStart(2, '0');
+            var day = String(date.getDate()).padStart(2, '0');
+            var hours = String(date.getHours()).padStart(2, '0');
+            var minutes = String(date.getMinutes()).padStart(2, '0');
+            var seconds = String(date.getSeconds()).padStart(2, '0');
+            
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        }
+        
+        // 显示配件详情
+        function showParts(computerId, computerName) {
+            // 显示加载动画
+            $('#partsTable tbody').html('<tr><td colspan="6" class="text-center"><div class="spinner" style="margin: 20px auto;"></div></td></tr>');
+            $('#partsModal .modal-title').text(computerName + ' - 配件详情');
+            $('#partsModal').modal('show');
+            
+            // 加载配件数据
+            $.ajax({
+                url: '@Url.Action("GetComputerParts", "Computer")',
+                type: 'GET',
+                data: { computerId: computerId },
+                dataType: 'json',
+                success: function(data) {
+                    renderPartsModal(data);
+                },
+                error: function() {
+                    $('#partsTable tbody').html('<tr><td colspan="6" class="text-center text-danger">获取配件详情失败</td></tr>');
+                }
+            });
+        }
+        
+        // 渲染配件详情模态框
+        function renderPartsModal(parts) {
+            var tbody = $('#partsTable tbody');
+            tbody.empty();
+            
+            // 添加配件数据
+            if (parts && parts.length > 0) {
+                $.each(parts, function(index, part) {
+                    var partStatus = part.PartStatus === 1 ? '正常' : '异常';
+                    var statusClass = part.PartStatus === 1 ? 'text-success' : 'text-danger';
+                    
+                    var row = '<tr>' +
+                        '<td>' + (index + 1) + '</td>' +
+                        '<td>' + part.PartType + '</td>' +
+                        '<td>' + part.PartName + '</td>' +
+                        '<td>¥' + part.PartCost.toFixed(2) + '</td>' +
+                        '<td class="' + statusClass + ' font-weight-medium">' + partStatus + '</td>' +
+                        '<td>' + formatDate(part.CreateTime) + '</td>' +
+                        '<td>' +
+                        '<button type="button" class="btn btn-sm btn-primary mr-1" data-part-id="' + part.Id + '" data-part-computer-id="' + part.ComputerId + '" data-part-type="' + part.PartType + '" data-part-name="' + part.PartName + '" data-part-cost="' + part.PartCost + '" data-part-status="' + part.PartStatus + '" data-part-platform="' + (part.PurchasePlatform || 1) + '" data-part-order="' + (part.ThirdPartyOrder || '') + '" onclick="editPartByData(this)">修改</button>' +
+                        '</td>' +
+                        '</tr>';
+                    tbody.append(row);
+                });
+            } else {
+                var row = '<tr><td colspan="7" class="text-center text-muted">暂无配件信息</td></tr>';
+                tbody.append(row);
+            }
+        }
+        
+        // 通过data属性编辑配件
+        function editPartByData(button) {
+            // 从data属性获取配件数据
+            var partData = {
+                Id: parseInt($(button).data('part-id')),
+                ComputerId: parseInt($(button).data('part-computer-id')),
+                PartType: $(button).data('part-type'),
+                PartName: $(button).data('part-name'),
+                PartCost: parseFloat($(button).data('part-cost')),
+                PartStatus: parseInt($(button).data('part-status')),
+                PurchasePlatform: parseInt($(button).data('part-platform')),
+                ThirdPartyOrder: $(button).data('part-order')
+            };
+            
+            // 填充表单数据
+            $('#editPartId').val(partData.Id);
+            $('#editPartComputerId').val(partData.ComputerId);
+            $('#editPartType').val(partData.PartType);
+            $('#editPartName').val(partData.PartName);
+            $('#editPartCost').val(partData.PartCost);
+            $('#editPartStatus').val(partData.PartStatus);
+            $('#editPurchasePlatform').val(partData.PurchasePlatform);
+            $('#editThirdPartyOrder').val(partData.ThirdPartyOrder);
+            
+            // 显示修改模态框
+            $('#editPartModal').modal('show');
+        }
+        
+        // 编辑配件（兼容旧方法）
+        function editPart(part) {
+            // 填充表单数据
+            $('#editPartId').val(part.Id);
+            $('#editPartComputerId').val(part.ComputerId);
+            $('#editPartType').val(part.PartType);
+            $('#editPartName').val(part.PartName);
+            $('#editPartCost').val(part.PartCost);
+            $('#editPartStatus').val(part.PartStatus);
+            $('#editPurchasePlatform').val(part.PurchasePlatform || 1);
+            $('#editThirdPartyOrder').val(part.ThirdPartyOrder || '');
+            
+            // 显示修改模态框
+            $('#editPartModal').modal('show');
+        }
+        
+        // 提交配件修改
+        function submitEditPart() {
+            // 获取表单数据
+            var partData = {
+                Id: parseInt($('#editPartId').val()),
+                ComputerId: parseInt($('#editPartComputerId').val()),
+                PartType: $('#editPartType').val().trim(),
+                PartName: $('#editPartName').val().trim(),
+                PartCost: parseFloat($('#editPartCost').val()),
+                PartStatus: parseInt($('#editPartStatus').val()),
+                ThirdPartyOrder: $('#editThirdPartyOrder').val().trim(),
+                PurchasePlatform: parseInt($('#editPurchasePlatform').val())
+            };
+            
+            // 表单验证
+            if (!partData.PartType || !partData.PartName || isNaN(partData.PartCost)) {
+                showToast('请填写完整的配件信息', 'error');
+                return;
+            }
+            
+            // 提交AJAX请求
+            $.ajax({
+                url: '/Computer/UpdateComputerPart',
+                type: 'POST',
+                data: partData,
+                dataType: 'json',
+                success: function(data) {
+                    if (data.success) {
+                        showToast('配件更新成功', 'success');
+                        
+                        // 重新加载配件列表
+                        var computerId = partData.ComputerId;
+                        $.ajax({
+                            url: '/Computer/GetComputerParts',
+                            type: 'GET',
+                            data: { computerId: computerId },
+                            dataType: 'json',
+                            success: function(parts) {
+                                renderPartsModal(parts);
+                            }
+                        });
+                        
+                        // 重新加载电脑列表，以更新成本和利润
+                        loadComputerListByPage();
+                        
+                        // 关闭模态框
+                        $('#editPartModal').modal('hide');
+                    } else {
+                        showToast('配件更新失败: ' + data.message, 'error');
+                    }
+                },
+                error: function() {
+                    showToast('更新失败，请稍后重试', 'error');
+                }
+            });
+        }
+        
+        // 显示更新状态模态框
+        function showUpdateStatusModal(computerId, computerName, currentStatus, currentSaleAmount, currentPlatformCommission) {
+            // 设置模态框标题和电脑ID
+            $('#updateStatusModal .modal-title').text(computerName + ' - 销售状态修改');
+            $('#computerId').val(computerId);
+            
+            // 设置当前值
+            $('#saleStatus').val(currentStatus);
+            $('#saleAmount').val(currentSaleAmount.toFixed(2));
+            // 计算默认平台提成（千分之六），但保留用户之前设置的值
+            if (currentPlatformCommission <= 0) {
+                var defaultCommission = (currentSaleAmount * 0.006).toFixed(2);
+                $('#platformCommission').val(defaultCommission);
+            } else {
+                $('#platformCommission').val(currentPlatformCommission.toFixed(2));
+            }
+            
+            // 清空输入框边框颜色
+            $('.form-control').removeClass('is-invalid is-valid');
+            
+            // 绑定售出金额变化事件
+            bindSaleAmountChangeEvent();
+            
+            // 显示模态框
+            $('#updateStatusModal').modal('show');
+        }
+        
+        // 绑定售出金额变化事件
+        function bindSaleAmountChangeEvent() {
+            // 先解绑之前的事件，避免重复绑定
+            $('#saleAmount').off('input change').on('input change', function() {
+                // 自动计算平台提成（千分之六）
+                var saleAmount = parseFloat($(this).val()) || 0;
+                var defaultCommission = (saleAmount * 0.006).toFixed(2);
+                $('#platformCommission').val(defaultCommission);
+            });
+        }
+        
+        // 更新销售状态
+        function updateSaleStatus() {
+            var computerId = $('#computerId').val();
+            var saleStatus = $('#saleStatus').val();
+            var saleAmount = parseFloat($('#saleAmount').val()) || 0;
+            var platformCommission = parseFloat($('#platformCommission').val()) || 0;
+            
+            // 验证输入
+            if (saleStatus == 4 && saleAmount <= 0) {
+                $('#saleAmount').addClass('is-invalid');
+                showToast('已售状态必须填写售出金额', 'warning');
+                return;
+            }
+            
+            // 发送AJAX请求更新状态
+            $.ajax({
+                url: '@Url.Action("UpdateSaleStatus", "Computer")',
+                type: 'POST',
+                data: {
+                    computerId: computerId,
+                    saleStatus: saleStatus,
+                    saleAmount: saleAmount,
+                    platformCommission: platformCommission
+                },
+                dataType: 'json',
+                success: function(result) {
+                    if (result.success) {
+                        showToast('销售状态更新成功', 'success');
+                        $('#updateStatusModal').modal('hide');
+                        loadComputerListByPage(); // 刷新列表
+                        loadSummaryStats(); // 刷新汇总数据
+                    } else {
+                        showToast('销售状态更新失败：' + result.message, 'error');
+                    }
+                },
+                error: function() {
+                    showToast('销售状态更新失败，请稍后重试', 'error');
+                }
+            });
+        }
+        
+        // 显示删除确认模态框
+        function showDeleteModal(computerId, computerName) {
+            $('#deleteComputerId').val(computerId);
+            $('#deleteComputerName').text(computerName);
+            $('#deleteModal').modal('show');
+        }
+        
+        // 确认删除
+        function confirmDelete() {
+            var computerId = $('#deleteComputerId').val();
+            
+            // 发送AJAX请求删除电脑
+            $.ajax({
+                url: '@Url.Action("DeleteComputer", "Computer")',
+                type: 'POST',
+                data: { computerId: computerId },
+                dataType: 'json',
+                success: function(result) {
+                    if (result.success) {
+                        showToast('电脑删除成功', 'success');
+                        $('#deleteModal').modal('hide');
+                        loadComputerListByPage(); // 刷新列表
+                    } else {
+                        showToast('电脑删除失败：' + result.message, 'error');
+                    }
+                },
+                error: function() {
+                    showToast('电脑删除失败，请稍后重试', 'error');
+                }
+            });
+        }
+        
+        // 显示Toast提示
+        function showToast(message, type = 'info') {
+            // 创建Toast元素
+            var toastHtml = `
+                <div class="toast show bg-${type === 'success' ? 'success' : type === 'error' ? 'danger' : type === 'warning' ? 'warning' : 'info'} text-white">
+                    <div class="toast-body d-flex align-items-center">
+                        <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                        <span>${message}</span>
+                        <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            
+            // 添加到容器
+            $('#toastContainer').append(toastHtml);
+            
+            // 3秒后自动关闭
+            setTimeout(function() {
+                $('.toast').fadeOut('slow', function() {
+                    $(this).remove();
+                });
+            }, 3000);
+        }
+        
+        // 加载已售电脑汇总数据
+        function loadSummaryStats() {
+            $.ajax({
+                url: '/Computer/GetSoldComputersSummary',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    if (data) {
+                        // 更新统计数据
+                        $('#totalCount').text(data.TotalCount || 0);
+                        $('#totalSaleAmount').text('¥' + (data.TotalSaleAmount || 0).toFixed(2));
+                        $('#totalCostAmount').text('¥' + (data.TotalCostAmount || 0).toFixed(2));
+                        $('#totalPlatformCommission').text('¥' + (data.TotalPlatformCommission || 0).toFixed(2));
+                        $('#totalProfitAmount').text('¥' + (data.TotalProfitAmount || 0).toFixed(2));
+                        
+                        // 计算利润率
+                        if (data.TotalSaleAmount && data.TotalSaleAmount > 0) {
+                            var profitRate = ((data.TotalProfitAmount || 0) / data.TotalSaleAmount * 100).toFixed(2);
+                            $('#profitRate').text(profitRate + '%');
+                        } else {
+                            $('#profitRate').text('0.00%');
+                        }
+                    }
+                },
+                error: function() {
+                    console.error('加载汇总数据失败');
+                }
+            });
+        }
+        
+        // 页面加载完成后执行
+        $(document).ready(function() {
+            // 加载电脑列表
+            loadComputerListByPage(1);
+            
+            // 加载汇总数据
+            loadSummaryStats();
+            
+            // 绑定搜索按钮点击事件
+            $('#searchBtn').click(function() {
+                loadComputerListByPage(1);
+            });
+            
+            // 绑定重置按钮点击事件
+            $('#resetBtn').click(function() {
+                $('#searchInput').val('');
+                $('#statusFilter').val('');
+                loadComputerListByPage(1);
+            });
+            
+            // 绑定刷新按钮点击事件
+            $('#refreshBtn').click(function() {
+                loadComputerListByPage(1);
+                loadSummaryStats(); // 同时刷新汇总数据
+            });
+            
+            // 绑定状态筛选变化事件
+            $('#statusFilter').change(function() {
+                loadComputerListByPage(1);
+            });
+        });
+    </script>
+    
+    <!-- 配件详情模态框 -->
+    <div class="modal fade" id="partsModal" tabindex="-1" role="dialog" aria-labelledby="partsModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="partsModalLabel">配件详情</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table id="partsTable" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>配件类型</th>
+                                    <th>配件名称</th>
+                                    <th>配件成本</th>
+                                    <th>配件状态</th>
+                                    <th>录入时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- 配件数据将通过jQuery动态加载 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 配件修改模态框 -->
+    <div class="modal fade" id="editPartModal" tabindex="-1" role="dialog" aria-labelledby="editPartModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editPartModalLabel">修改配件</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editPartId" />
+                    <input type="hidden" id="editPartComputerId" />
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="editPartType" class="col-form-label">配件类型：</label>
+                            <input type="text" class="form-control" id="editPartType" placeholder="请输入配件类型" required>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="editPartName" class="col-form-label">配件名称：</label>
+                            <input type="text" class="form-control" id="editPartName" placeholder="请输入配件名称" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="editPartCost" class="col-form-label">配件成本：</label>
+                            <input type="number" step="0.01" class="form-control" id="editPartCost" placeholder="请输入配件成本" required>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="editPartStatus" class="col-form-label">配件状态：</label>
+                            <select class="form-control" id="editPartStatus">
+                                <option value="1">正常</option>
+                                <option value="2">异常</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="editPurchasePlatform" class="col-form-label">购买平台：</label>
+                            <select class="form-control" id="editPurchasePlatform">
+                                <option value="1">咸鱼</option>
+                                <option value="2">淘宝</option>
+                                <option value="3">京东</option>
+                                <option value="4">其他</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="editThirdPartyOrder" class="col-form-label">第三方订单：</label>
+                        <input type="text" class="form-control" id="editThirdPartyOrder" placeholder="请输入第三方订单号">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="submitEditPart()">确认修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 销售状态修改模态框 -->
+    <div class="modal fade" id="updateStatusModal" tabindex="-1" role="dialog" aria-labelledby="updateStatusModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateStatusModalLabel">销售状态修改</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <input type="hidden" id="computerId" />
+                        <label for="saleStatus" class="col-form-label">销售状态：</label>
+                        <select class="form-control" id="saleStatus">
+                            <option value="1">待安装</option>
+                            <option value="2">配件异常</option>
+                            <option value="3">待出售</option>
+                            <option value="4">已售</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="saleAmount" class="col-form-label">售出金额：</label>
+                        <input type="number" step="0.01" class="form-control" id="saleAmount" placeholder="请输入售出金额" />
+                    </div>
+                    <div class="form-group">
+                        <label for="platformCommission" class="col-form-label">平台提成：</label>
+                        <input type="number" step="0.01" class="form-control" id="platformCommission" placeholder="请输入平台提成" />
+                        <small class="form-text text-muted">平台提成会根据售出金额自动计算（千分之六），您可以手动修改</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="updateSaleStatus()">确认修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 删除确认模态框 -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteModalLabel">删除确认</h5>
+                    <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">
+                        <i class="bi bi-exclamation-triangle text-danger me-2"></i>
+                        确定要删除电脑 <strong id="deleteComputerName"></strong> 及其所有配件吗？
+                    </p>
+                    <p class="text-muted mt-2">
+                        此操作不可恢复，删除后数据将永久丢失。
+                    </p>
+                    <input type="hidden" id="deleteComputerId" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">确认删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+</body>
+</html>
