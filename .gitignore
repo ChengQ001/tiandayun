@@ -1,0 +1,12 @@
+# Visual Studio 编译输出/中间文件（核心忽略）
+bin/
+obj/
+# Visual Studio 本地环境缓存/索引
+.vs/
+# VS本地用户配置文件（无需版本控制）
+*.suo
+*.user
+*.userosscache
+# 发布/测试相关目录
+publish/
+TestResults/
