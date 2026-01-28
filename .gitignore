@@ -1,12 +1,21 @@
-# Visual Studio 编译输出/中间文件（核心忽略）
-WebApplication1/bin/
-WebApplication1/obj/
-# Visual Studio 本地环境缓存/索引
-WebApplication1/.vs/
-# VS本地用户配置文件（无需版本控制）
-WebApplication1/*.suo
-WebApplication1/*.user
-WebApplication1/*.userosscache
-# 发布/测试相关目录
-WebApplication1/publish/
-WebApplication1/TestResults/
+# Visual Studio 本地环境文件（根目录的.vs目录，若存在）
+.vs/
+
+# 编译输出与中间文件（适配子项目结构）
+# 忽略所有子目录下的bin和obj
+**/bin/
+**/obj/
+
+# Visual Studio 用户配置文件
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# 发布与测试目录
+**/publish/
+**/TestResults/
+
+# 临时文件
+*.tmp
+*.bak
